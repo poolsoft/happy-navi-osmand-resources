@@ -3,6 +3,7 @@
 % for swi-prolog
 :- op(500, xfy,'--').
 
+% TODO: Should be updated to v103 to get more features and better grammar. Use existing v103 files as template.
 version(102).
 tts :- version(X), X > 99.
 voice :- version(X), X < 99.
@@ -10,14 +11,14 @@ voice :- version(X), X < 99.
 language('ja').
 fest_language('').
 
-% IMPLEMENTED (X) or MISSING ( ) FEATURES:
-% (X) new Version 1.5 format
+% IMPLEMENTED (X) or MISSING ( ) FEATURES, (N/A) if not needed in this language:
+%
 % (X) route calculated prompts, left/right, u-turns, roundabouts, straight/follow
 % (X) arrival
 % (X) other prompts: attention (without Type implementation), location lost, off_route, exceed speed limit
 % (X) special grammar: onto_street / on_street / to_street
-% (N/A) special grammar: nominative/dativ for distance measure
-% (N/A) special grammar: imperative/infinitive distincion for turns
+% (N/A) special grammar: nominative/dative for distance measure
+% (N/A) special grammar: imperative/infinitive distinction for turns
 % (X) distance measure: meters / feet / yard support
 % (X) Street name announcement (suppress in prepare_roundabout)
 % (X) Name announcement for destination / intermediate / GPX waypoint arrival
@@ -255,6 +256,7 @@ hours(S, []) :- S < 60.
 %hours(S, ['1_jikan.ogg']) :- S < 120, H is S div 60, pnumber(H, Ogg).
 hours(S, [Ogg, 'jikan.ogg']) :- H is S div 60, pnumber(H, Ogg).
 time(Sec) -- ['ippun_inai.ogg'] :- Sec < 30.
+time(Sec) -- [H] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, St = 0.
 time(Sec) -- [H, 'ippun.ogg'] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, St = 1, pnumber(St, Ogg).
 time(Sec) -- [H, Ogg, 'minutes.ogg'] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, pnumber(St, Ogg).
 

@@ -1,5 +1,3 @@
-%%% !!! THIS IS GENERATED FILE !!! Modify ttsconfig.p
-﻿% :- 
 % for turbo-prolog
 :- op('--', xfy, 500).
 % for swi-prolog
@@ -11,14 +9,14 @@ voice :- version(X), X < 99.
 
 language(uk).
 
-% IMPLEMENTED (X) or MISSING ( ) FEATURES:
-% (X) new Version 1.5 format
+% IMPLEMENTED (X) or MISSING ( ) FEATURES, (N/A) if not needed in this language:
+%
 % (X) route calculated prompts, left/right, u-turns, roundabouts, straight/follow
 % (X) arrival
 % (X) other prompts: attention (without Type implementation), location lost, off_route, exceed speed limit
 % (X) special grammar: onto / on / to Street fur turn and follow commands
-% (N/A) special grammar: nominative/dativ for distance measure
-% (N/A) special grammar: imperative/infinitive distincion for turns
+% (N/A) special grammar: nominative/dative for distance measure
+% (N/A) special grammar: imperative/infinitive distinction for turns
 % (X) distance measure: meters / feet / yard support
 % (X) Street name announcement (suppress in prepare_roundabout)
 % (X) Name announcement for destination / intermediate / GPX waypoint arrival
@@ -156,9 +154,13 @@ bear_left(_Street) -- ['voice/turns/keep_left.ogg'].
 bear_right(_Street) -- ['voice/turns/keep_right.ogg'].
 
 % cut_part_street(voice([Ref, Name, Dest], [_CurrentRef, _CurrentName, _CurrentDest]), _).
-cut_part_street(voice(['', '', Dest], _), Dest).
 % cut_part_street(voice(['', Name, _], _), Name). % not necessary
-cut_part_street(voice([Ref, Name, _], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Name, Concat).
+% Next 2 lines for Name taking precedence over Dest...
+%cut_part_street(voice([Ref, '', Dest], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Dest, Concat).
+%cut_part_street(voice([Ref, Name, _], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Name, Concat).
+% ...or next 2 lines for Dest taking precedence over Name
+cut_part_street(voice([Ref, Name, ''], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Name, Concat).
+cut_part_street(voice([Ref, _, Dest], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Dest, Concat).
 
 turn_street('', []).
 turn_street(voice(['','',''],_), []).
@@ -319,9 +321,11 @@ fnumber(X, Ogg) :- X > 2, num_atom(X, B), atom_concat('voice/numbers/n/', B, A),
 hours(S, []) :- S < 60.
 hours(S, [Ogg, Hs]) :- H is S div 60, plural_hs(H, Hs), fnumber(H, Ogg).
 time(Sec) -- ['voice/less_a_minute.ogg'] :- Sec < 30.
+time(Sec) -- [H] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, St = 0.
 time(Sec) -- [H, Ogg, Mn] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, plural_mn(St, Mn), fnumber(St, Ogg).
 time(Sec) -- [Ogg, Mn] :- not(tts), Sec < 300, St is Sec/60, plural_mn(St, Mn), fnumber(St, Ogg).
-time(Sec) -- [H, Ogg, Mn] :- not(tts), S is round(Sec/300.0)*5, hours(S, H), St is S mod 60, plural_mn(St, Mn), fnumber(St, Ogg).
+time(Sec) -- [H, Ogg, Mn] :- not(tts), S is round(Sec/300.0)*5, St is S mod 60, St > 0, hours(S, H), plural_mn(St, Mn), fnumber(St, Ogg).
+time(Sec) -- [H] :- not(tts), S is round(Sec/300.0) * 5, hours(S, H), St is S mod 60.
 
 plural_hs(D, 'voice/units/hour.ogg') :- 1 is D mod 10, R100 is D mod 100,(R100 > 20; R100 < 10).
 plural_hs(D, 'voice/units/2hours.ogg') :- Mod is D mod 10, Mod < 5,  Mod > 1, R100 is D mod 100,(R100 > 20; R100 < 10).

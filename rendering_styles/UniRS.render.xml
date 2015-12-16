@@ -6,8 +6,8 @@
 		type="string" possibleValues="2,3,4,6,8,11" defaultValueDescription="default"/>
 
 	<renderingAttribute name="route">
-		<case color="#88aa0088" strokeWidth="7:6" color_3="#ffde5b" strokeWidth_3="7:6">
-			<apply_if nightMode="true" color="#77ff4400" strokeWidth="7:6"/>
+		<case color="#88aa0088" strokeWidth="12:8" color_3="#ffde5b" strokeWidth_3="7:6">
+			<apply_if nightMode="true" color="#aa00fff7"/>
 		</case>
 	</renderingAttribute>
 	<renderingAttribute name="gpx" cap="ROUND">
@@ -40,18 +40,12 @@
 				<case currentTrackWidth="11" strokeWidth="11"/>
 				<case strokeWidth="2"/>
 			</apply>
-<!--			<apply_if additional="routePoints=true" pathEffect="6_2"/>-->
+			<apply_if additional="routePoints=true" pathEffect="6_2"/>
 		</switch>
 	</renderingAttribute>
 
 	<renderingConstant name="null" value="#00000000"/>
 
-<!--	<renderingAttribute name="residentialRoadColor">
-		<case attrColorValue="#ffffff">
-			<apply_if nightMode="true" attrColorValue="#9f9f9f"/>
-		</case>
-	</renderingAttribute>
--->
 	<renderingAttribute name="tertiaryRoadShadowColor">
 		<case roadStyle="boldOutline" attrColorValue="#000000">
 			<apply_if nightMode="true" attrColorValue="$null"/>
@@ -112,8 +106,8 @@
 		<case roadStyle="boldOutline" attrColorValue="#000000">
 			<apply_if nightMode="true" attrColorValue="$null"/>
 		</case>
-		<case attrColorValue="#55555555">
-			<apply_if nightMode="true" attrColorValue="#999999"/>
+		<case attrColorValue="#00de98">
+			<apply_if nightMode="true" attrColorValue="#00b063"/>
 		</case>
 	</renderingAttribute>
 	<renderingConstant name="trackStrokeWidth" value="1:1"/>
@@ -157,7 +151,6 @@
 	<renderingConstant name="placeCityVillageTextColorDay" value="#000000"/>
 	<renderingConstant name="placeSuburbLocalityTextColorDay" value="#000000"/>
 	<renderingConstant name="placeTextHaloRadiusDay" value="1"/>
-	<renderingConstant name="placeTextHaloColorDay" value="#ffffff"/>
 
 	<renderingConstant name="placeHamletMinZoom" value="11"/>
 	<renderingConstant name="placeSuburbMinZoom" value="11"/>
@@ -189,17 +182,15 @@
 		</case>
 	</renderingAttribute>
 	<renderingConstant name="forestColorDay" value="#9cd77b"/>
-	<renderingConstant name="woodColorDesaturatedDay" value="#b4d0a9"/>
-	<renderingConstant name="forestColorDesaturatedDay" value="#aac599"/>
 	<renderingConstant name="woodBroadleavedShader" value="wood_broadleaved2"/>
 	<renderingConstant name="woodNeedleleavedShader" value="wood_needleleaved2"/>
 	<renderingConstant name="woodMixedShader" value="wood_mixed2"/>
 
-	<renderingConstant name="waterColorDay" value="#76cbea"/>
-	<renderingConstant name="waterStrokeColorDay" value="#61b8ee"/>
-	<renderingConstant name="waterColorNight" value="#330099"/>
-	<renderingConstant name="waterDesaturatedColorDay" value="#b5d0d0"/>
-	<renderingConstant name="waterDesaturatedColorNight" value="#184d6f"/>
+	<renderingAttribute name="waterColor">
+		<case nightMode="true" attrColorValue="#330099"/>
+		<case attrColorValue="#76cbea"/>
+	</renderingAttribute>
+
 	<renderingConstant name="waterwayDirectionIcon" value="arrow_blue_big"/>
 
 	<renderingConstant name="parkingPrivateColorDay" value="#77f6eeb7"/>
@@ -230,11 +221,18 @@
 	<renderingConstant name="farmyardColorNight" value="#3d3528"/>
 	<renderingConstant name="wetlandColorNight" value="#304a5e"/>
 	<renderingConstant name="meadowColorNight" value="#232d01"/>
-	<renderingConstant name="churchColorDay" value="#b6a0b5"/>
-	<renderingConstant name="churchColorNight" value="#795877"/>
-	<renderingConstant name="attractionColorNight" value="#834522"/>
-	<renderingConstant name="attractionStrokeColorDay" value="#920029"/>
-	<renderingConstant name="attractionStrokeColorNight" value="#6dffd6"/>
+	<renderingAttribute name="churchColor">
+		<case nightMode="true" attrColorValue="#795877"/>
+		<case attrColorValue="#b6a0b5"/>
+	</renderingAttribute>
+	<renderingAttribute name="attractionColor">
+		<case nightMode="true" attrColorValue="#834522"/>
+		<case attrColorValue="#f2caea"/>
+	</renderingAttribute>
+	<renderingAttribute name="attractionStrokeColor">
+		<case nightMode="true" attrColorValue="#6dffd6"/>
+		<case attrColorValue="#920029"/>
+	</renderingAttribute>
 	<renderingConstant name="attractionStrokeWidth" value="0.9"/>
 	<renderingConstant name="attractionStrokeWidth2" value="0.9"/>
 	<renderingConstant name="themeparkColorNight" value="#776f4664"/>

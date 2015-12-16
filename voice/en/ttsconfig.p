@@ -10,15 +10,15 @@ voice :- version(X), X < 99.
 language('en').
 fest_language('cmu_us_awb_arctic_clunits').
 
-% IMPLEMENTED (X) or MISSING ( ) FEATURES:
-% (X) new Version 1.5 format
+% IMPLEMENTED (X) or MISSING ( ) FEATURES, (N/A) if not needed in this language:
+%
 % (X) route calculated prompts, left/right, u-turns, roundabouts, straight/follow
 % (X) arrival
 % (X) other prompts: attention (without Type implementation), location lost, off_route, exceed speed limit
 % (X) attention Type implementation
 % (X) special grammar: onto / on / to Street fur turn and follow commands
-% (N/A) special grammar: nominative/dativ for distance measure
-% (N/A) special grammar: imperative/infinitive distincion for turns
+% (N/A) special grammar: nominative/dative for distance measure
+% (N/A) special grammar: imperative/infinitive distinction for turns
 % (X) distance measure: meters / feet / yard support
 % (X) Street name announcement (suppress in prepare_roundabout)
 % (X) Name announcement for destination / intermediate / GPX waypoint arrival
@@ -36,8 +36,8 @@ string('distance.ogg', 'distance ').
 
 % LEFT/RIGHT
 %string('prepare.ogg', 'Prepare to ').
-string('in.ogg', 'in ').
 string('after.ogg', 'after ').
+string('in.ogg', 'in ').
 
 string('left.ogg', 'turn left ').
 string('left_sh.ogg', 'turn sharply left ').
@@ -47,7 +47,8 @@ string('right_sh.ogg', 'turn sharply right ').
 string('right_sl.ogg', 'turn slightly right ').
 string('left_keep.ogg', 'keep left').
 string('right_keep.ogg', 'keep right').
-% if needed, "left/right_bear.ogg" can be defined here also. "... (then) (bear_left/right)" is used in pre-announcements to indicate the direction of a successive turn AFTER the next turn.
+% string('bear_left.ogg', 'keep left').   % not needed as separate string in English
+% string('bear_right.ogg', 'keep right'). % not needed as separate string in English
 
 % U-TURNS
 string('make_uturn.ogg', 'Make a U turn ').
@@ -82,13 +83,14 @@ string('17th.ogg', 'seventeenth ').
 
 % STRAIGHT/FOLLOW
 string('go_ahead.ogg', 'Go straight ahead ').
-string('follow.ogg', 'Follow the course of the road for').
+%string('follow.ogg', 'Follow the course of the road for').
+string('follow.ogg', 'Continue for').
 
 % ARRIVE
 string('and_arrive_destination.ogg', 'and arrive at your destination ').
 string('reached_destination.ogg','you have reached your destination ').
-string('and_arrive_intermediate.ogg', 'and arrive at your waypoint ').
-string('reached_intermediate.ogg', 'you have reached your waypoint ').
+string('and_arrive_intermediate.ogg', 'and arrive at your intermediate destination ').
+string('reached_intermediate.ogg', 'you have reached your intermediate destination ').
 %NEARBY POINTS
 string('and_arrive_waypoint.ogg', 'and pass GPX waypoint ').
 string('reached_waypoint.ogg', 'you are passing GPX waypoint ').
@@ -151,13 +153,18 @@ turn('right_sh', ['right_sh.ogg']).
 turn('right_sl', ['right_sl.ogg']).
 turn('left_keep', ['left_keep.ogg']).
 turn('right_keep', ['right_keep.ogg']).
-bear_left(_Street) -- ['left_keep.ogg'].
-bear_right(_Street) -- ['right_keep.ogg'].
+% Note: turn('left_keep'/'right_keep',[]) is a turn type aiding lane selection, while bear_left()/bear_right() are triggered as brief "turn-after-next" preparation sounding always after a "..., then...". In some languages l/r_keep may not differ from bear_l/r:
+bear_left(_Street) -- ['left_keep.ogg'].   % if needed use separate bear_left.ogg here
+bear_right(_Street) -- ['right_keep.ogg']. % if needed use separate bear_right.ogg here
 
 % cut_part_street(voice([Ref, Name, Dest], [_CurrentRef, _CurrentName, _CurrentDest]), _).
-cut_part_street(voice([Ref, '', Dest], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Dest, Concat).
 % cut_part_street(voice(['', Name, _], _), Name). % not necessary
-cut_part_street(voice([Ref, Name, _], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Name, Concat).
+% Next 2 lines for Name taking precedence over Dest...
+%cut_part_street(voice([Ref, '', Dest], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Dest, Concat).
+%cut_part_street(voice([Ref, Name, _], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Name, Concat).
+% ...or next 2 lines for Dest taking precedence over Name
+cut_part_street(voice([Ref, Name, ''], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Name, Concat).
+cut_part_street(voice([Ref, _, Dest], _), Concat) :- atom_concat(Ref, ' ', C1), atom_concat(C1, Dest, Concat).
 
 turn_street('', []).
 turn_street(voice(['','',''],_), []).
@@ -173,17 +180,17 @@ follow_street(Street, ['to.ogg', SName]) :- tts, not(Street = voice([R, S, _],[R
 follow_street(Street, ['on.ogg', SName]) :- tts, Street = voice([R, S, _],[R, S, _]), cut_part_street(Street, SName).
 follow_street(_Street, []) :- not(tts).
 
-prepare_turn(Turn, Dist, Street) -- ['in.ogg', D, M | Sgen] :- distance(Dist) -- D, turn(Turn, M), turn_street(Street, Sgen).
-turn(Turn, Dist, Street) -- ['after.ogg', D, M | Sgen] :- distance(Dist) -- D, turn(Turn, M), turn_street(Street, Sgen).
+prepare_turn(Turn, Dist, Street) -- ['after.ogg', D, M | Sgen] :- distance(Dist) -- D, turn(Turn, M), turn_street(Street, Sgen).
+turn(Turn, Dist, Street) -- ['in.ogg', D, M | Sgen] :- distance(Dist) -- D, turn(Turn, M), turn_street(Street, Sgen).
 turn(Turn, Street) -- [M | Sgen] :- turn(Turn, M), turn_street(Street, Sgen).
 
-prepare_make_ut(Dist, Street) -- ['in.ogg', D, 'make_uturn.ogg' | Sgen] :- distance(Dist) -- D, turn_street(Street, Sgen).
-make_ut(Dist, Street) --  ['after.ogg', D, 'make_uturn.ogg' | Sgen] :- distance(Dist) -- D, turn_street(Street, Sgen).
+prepare_make_ut(Dist, Street) -- ['after.ogg', D, 'make_uturn.ogg' | Sgen] :- distance(Dist) -- D, turn_street(Street, Sgen).
+make_ut(Dist, Street) --  ['in.ogg', D, 'make_uturn.ogg' | Sgen] :- distance(Dist) -- D, turn_street(Street, Sgen).
 make_ut(Street) -- ['make_uturn.ogg' | Sgen] :- turn_street(Street, Sgen).
 make_ut_wp -- ['make_uturn_wp.ogg'].
 
-prepare_roundabout(Dist, _Exit, _Street) -- ['in.ogg', D , 'prepare_roundabout.ogg'] :- distance(Dist) -- D.
-roundabout(Dist, _Angle, Exit, Street) -- ['after.ogg', D, 'roundabout.ogg', 'and.ogg', 'take.ogg', E, 'exit.ogg' | Sgen] :- distance(Dist) -- D, nth(Exit, E), turn_street(Street, Sgen).
+prepare_roundabout(Dist, _Exit, _Street) -- ['after.ogg', D , 'prepare_roundabout.ogg'] :- distance(Dist) -- D.
+roundabout(Dist, _Angle, Exit, Street) -- ['in.ogg', D, 'roundabout.ogg', 'and.ogg', 'take.ogg', E, 'exit.ogg' | Sgen] :- distance(Dist) -- D, nth(Exit, E), turn_street(Street, Sgen).
 roundabout(_Angle, Exit, Street) -- ['take.ogg', E, 'exit.ogg' | Sgen] :- nth(Exit, E), turn_street(Street, Sgen).
 
 go_ahead(Dist, Street) -- ['follow.ogg', D | Sgen] :- distance(Dist) -- D, follow_street(Street, Sgen).
@@ -274,11 +281,12 @@ hours(S, []) :- S < 60.
 hours(S, ['1_hour.ogg']) :- S < 120, H is S div 60, pnumber(H, Ogg).
 hours(S, [Ogg, 'hours.ogg']) :- H is S div 60, pnumber(H, Ogg).
 time(Sec) -- ['less_a_minute.ogg'] :- Sec < 30.
+time(Sec) -- [H] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, St = 0.
 time(Sec) -- [H, '1_minute.ogg'] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, St = 1, pnumber(St, Ogg).
 time(Sec) -- [H, Ogg, 'minutes.ogg'] :- tts, S is round(Sec/60.0), hours(S, H), St is S mod 60, pnumber(St, Ogg).
 time(Sec) -- [Ogg, 'minutes.ogg'] :- not(tts), Sec < 300, St is Sec/60, pnumber(St, Ogg).
-time(Sec) -- [H, Ogg, 'minutes.ogg'] :- not(tts), S is round(Sec/300.0) * 5, hours(S, H), St is S mod 60, pnumber(St, Ogg).
-
+time(Sec) -- [H, Ogg, 'minutes.ogg'] :- not(tts), S is round(Sec/300.0) * 5, St is S mod 60, St > 0, hours(S, H), pnumber(St, Ogg).
+time(Sec) -- [H] :- not(tts), S is round(Sec/300.0) * 5, hours(S, H), St is S mod 60.
 
 %%% distance measure
 distance(Dist) -- D :- measure('km-m'), distance_km(Dist) -- D.
